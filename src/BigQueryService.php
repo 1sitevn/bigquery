@@ -3,9 +3,7 @@
 namespace OneSite\BigQuery;
 
 use Google\Cloud\BigQuery\BigQueryClient;
-use Google\Cloud\BigQuery\Dataset;
 use Google\Cloud\BigQuery\QueryResults;
-use Google\Cloud\BigQuery\Table;
 
 /**
  * Class BigQueryService
@@ -47,68 +45,113 @@ class BigQueryService
     }
 
     /**
-     * @param $dataSet
+     * @param $dataset
      * @return mixed
      */
-    public function createDataset($dataSet)
+    public function createDataset($dataset)
     {
         try {
-            return $this->getConnection()->createDataset($dataSet);
+            return $this->getConnection()->createDataset($dataset);
         } catch (\Exception $exception) {
             return json_decode($exception->getMessage());
         }
     }
 
     /**
-     * @param $dataSet
+     * @param $dataset
      * @return mixed
      */
-    public function getDataset($dataSet)
+    public function getDataset($dataset)
     {
         try {
-            return $this->getConnection()->dataset($dataSet);
+            return $this->getConnection()->dataset($dataset);
         } catch (\Exception $exception) {
             return json_decode($exception->getMessage());
         }
     }
 
     /**
-     * @param Dataset $dataSet
-     * @param $table
-     * @return \Google\Cloud\BigQuery\Table|mixed
+     * @param $datasetName
+     * @param $tableName
+     * @param array $schema
+     * @return mixed
      */
-    public function getTable(Dataset $dataSet, $table)
+    public function createTable($datasetName, $tableName, $schema = [])
     {
         try {
-            return $dataSet->table($table);
+            $dataset = $this->getConnection()->dataset($datasetName);
+
+            $table = $dataset->table($tableName);
+
+            if (!$table->exists()) {
+                $dataset->createTable($table->id(), [
+                    'schema' => [
+                        'fields' => $schema
+                    ]
+                ]);
+            }
+        } catch (\Exception $exception) {
+            return json_decode($exception->getMessage());
+        }
+    }
+
+
+    /**
+     * @param $datasetName
+     * @param $tableName
+     * @return mixed
+     */
+    public function getTable($datasetName, $tableName)
+    {
+        try {
+            $dataset = $this->getConnection()->dataset($datasetName);
+
+            return $dataset->table($tableName);
         } catch (\Exception $exception) {
             return json_decode($exception->getMessage());
         }
     }
 
     /**
-     * @param Table $table
+     * @param $datasetName
+     * @param $tableName
      * @param $attributes
-     * @return \Google\Cloud\BigQuery\InsertResponse|mixed
+     * @param array $options
+     * @return mixed
      */
-    public function insertRow(Table $table, $attributes)
+    public function insertRow($datasetName, $tableName, $attributes, $options = [])
     {
         try {
+            $dataset = $this->getConnection()->dataset($datasetName);
+
+            $table = $dataset->table($tableName);
+
+            if (!empty($options)) {
+                return $table->insertRow($attributes, $options);
+            }
+
             return $table->insertRow($attributes);
         } catch (\Exception $exception) {
             return json_decode($exception->getMessage());
         }
     }
 
+
     /**
-     * @param Table $table
+     * @param $datasetName
+     * @param $tableName
      * @param $data
-     * @return \Google\Cloud\BigQuery\InsertResponse|mixed
+     * @param array $options
+     * @return mixed
      */
-    public function insertRows(Table $table, $data)
+    public function insertRows($datasetName, $tableName, $data, $options = [])
     {
         try {
-            return $table->insertRows($data);
+            $dataset = $this->getConnection()->dataset($datasetName);
+
+            $table = $dataset->table($tableName);
+
+            return $table->insertRows($data, $options);
         } catch (\Exception $exception) {
             return json_decode($exception->getMessage());
         }

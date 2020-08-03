@@ -7,7 +7,6 @@ namespace OneSite\NinePay\BigQuery\Tests;
 use Google\Cloud\BigQuery\Dataset;
 use Google\Cloud\BigQuery\QueryResults;
 use Google\Cloud\BigQuery\Table;
-use GuzzleHttp\Psr7\Response;
 use OneSite\BigQuery\BigQueryService;
 use PHPUnit\Framework\TestCase;
 
@@ -62,9 +61,7 @@ class BigQueryServiceTest extends TestCase
      */
     public function testGetTable()
     {
-        $dataset = $this->service->getDataset(config('bigquery.dataset'));
-
-        $table = $this->service->getTable($dataset, config('bigquery.table'));
+        $table = $this->service->getTable(config('bigquery.dataset'), config('bigquery.table'));
 
         $this->assertInstanceOf(Table::class, $table);
     }
@@ -74,14 +71,189 @@ class BigQueryServiceTest extends TestCase
      */
     public function testInsertRow()
     {
-        $dataset = $this->service->getDataset(config('bigquery.dataset'));
-
-        $table = $this->service->getTable($dataset, config('bigquery.table'));
-
-        $table->insertRow([
+        $data = $this->service->insertRow(config('bigquery.dataset'), config('bigquery.table'), [
             'id' => 1,
             'request_id' => 'xxx',
             'session_id' => 'xxx',
+        ]);
+
+        echo "\n" . json_encode($data);
+
+        $this->assertTrue(true);
+    }
+
+    /**
+     * PHPUnit test: vendor/bin/phpunit --filter testCreateTableAndInsertRow tests/BigQueryServiceTest.php
+     */
+    public function testCreateTableAndInsertRow()
+    {
+        $this->service->insertRow(config('bigquery.dataset'), config('bigquery.table'), [
+            'id' => 1,
+            'request_id' => 'xxx',
+            'session_id' => 'xxx',
+        ], [
+            'autoCreate' => true,
+            'tableMetadata' => [
+                'schema' => [
+                    'fields' => [
+                        [
+                            'name' => 'id',
+                            'type' => 'INTEGER',
+                            'mode' => 'REQUIRED'
+                        ],
+                        [
+                            'name' => 'request_id',
+                            'type' => 'STRING'
+                        ],
+                        [
+                            'name' => 'session_id',
+                            'type' => 'STRING'
+                        ],
+                    ]
+                ]
+            ]
+        ]);
+
+        $this->assertTrue(true);
+    }
+
+    /**
+     * PHPUnit test: vendor/bin/phpunit --filter testCreateNewTable tests/BigQueryServiceTest.php
+     */
+    public function testCreateNewTable()
+    {
+        $this->service->createTable(config('bigquery.dataset'), config('bigquery.table'), [
+            [
+                'name' => 'id',
+                'type' => 'INTEGER',
+                'mode' => 'REQUIRED'
+            ],
+            [
+                'name' => 'type',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'label',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'request_id',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'session_id',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'user_id',
+                'type' => 'INTEGER'
+            ],
+            [
+                'name' => 'user_phone',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'object_id',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'object_type',
+                'type' => 'STRING'
+            ], [
+                'name' => 'device_id',
+                'type' => 'STRING'
+            ], [
+                'name' => 'device_name',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'device_model',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'browser_name',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'browser_version',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'ip',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'platform',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'platform_version',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'network',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'os',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'user_agent',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'country',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'province',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'district',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'ward',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'lat',
+                'type' => 'FLOAT'
+            ],
+            [
+                'name' => 'lng',
+                'type' => 'FLOAT'
+            ],
+            [
+                'name' => 'send_by',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'feature',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'screen_name',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'screen_element',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'time',
+                'type' => 'TIMESTAMP'
+            ],
+            [
+                'name' => 'created_at',
+                'type' => 'TIMESTAMP'
+            ],
+            [
+                'name' => 'updated_at',
+                'type' => 'TIMESTAMP'
+            ],
         ]);
 
         $this->assertTrue(true);
@@ -100,7 +272,7 @@ class BigQueryServiceTest extends TestCase
         if ($queryResults->isComplete()) {
             $rows = $queryResults->rows();
             foreach ($rows as $row) {
-                printf("\nRow: %s, %s" . PHP_EOL, $row['id'], $row['request_id']);
+                echo "\n" . json_encode($row);
             }
 
             $this->assertTrue(true);
