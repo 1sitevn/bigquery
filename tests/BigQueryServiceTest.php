@@ -118,11 +118,11 @@ class BigQueryServiceTest extends TestCase
     }
 
     /**
-     * PHPUnit test: vendor/bin/phpunit --filter testCreateNewTable tests/BigQueryServiceTest.php
+     * PHPUnit test: vendor/bin/phpunit --filter testCreateEventsTable tests/BigQueryServiceTest.php
      */
-    public function testCreateNewTable()
+    public function testCreateEventsTable()
     {
-        $this->service->createTable(config('bigquery.dataset'), config('bigquery.table'), [
+        $this->service->createTable(config('bigquery.dataset'), 'events', [
             [
                 'name' => 'id',
                 'type' => 'INTEGER',
@@ -260,27 +260,145 @@ class BigQueryServiceTest extends TestCase
     }
 
     /**
+     * PHPUnit test: vendor/bin/phpunit --filter testCreateUsersTable tests/BigQueryServiceTest.php
+     */
+    public function testCreateUsersTable()
+    {
+        $this->service->createTable(config('bigquery.dataset'), 'users', [
+            [
+                'name' => 'user_id',
+                'type' => 'INTEGER',
+                'mode' => 'REQUIRED'
+            ],
+            [
+                'name' => 'request_id',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'phone',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'name',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'email',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'status',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'address',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'avatar_url',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'birthday',
+                'type' => 'DATE'
+            ],
+            [
+                'name' => 'gender',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'card_no',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'card_issue_at',
+                'type' => 'DATE'
+            ],
+            [
+                'name' => 'card_issue_place',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'card_expired_at',
+                'type' => 'DATE'
+            ],
+            [
+                'name' => 'card_image_front_url',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'card_image_back_url',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'is_verify_email',
+                'type' => 'BOOL'
+            ],
+            [
+                'name' => 'is_verify_phone',
+                'type' => 'BOOL'
+            ],
+            [
+                'name' => 'is_verify_info',
+                'type' => 'BOOL'
+            ],
+            [
+                'name' => 'dialing_code',
+                'type' => 'INTEGER'
+            ],
+            [
+                'name' => 'is_vip',
+                'type' => 'BOOL'
+            ],
+            [
+                'name' => 'country',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'province',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'district',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'ward',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'description',
+                'type' => 'STRING'
+            ],
+            [
+                'name' => 'created_at',
+                'type' => 'TIMESTAMP'
+            ],
+            [
+                'name' => 'updated_at',
+                'type' => 'TIMESTAMP'
+            ],
+        ]);
+
+        $this->assertTrue(true);
+    }
+
+    /**
      * PHPUnit test: vendor/bin/phpunit --filter testQuery tests/BigQueryServiceTest.php
      */
     public function testQuery()
     {
-        /**
-         * @var QueryResults $data
-         */
-        $queryResults = $this->service->query("select * from test.events");
+        $queryResults = $this->service->query("select * from test.events where id = @id", [
+            'id' => 1
+        ]);
 
-        if ($queryResults->isComplete()) {
-            $rows = $queryResults->rows();
-            foreach ($rows as $row) {
-                echo "\n" . json_encode($row);
-            }
+        /*$queryResults = $this->service->query("update test.events set type = 'test' where id = @id", [
+            'id' => 1
+        ]);*/
 
-            $this->assertTrue(true);
+        echo "\n" . json_encode($queryResults);
 
-            return;
-        }
-
-        $this->assertTrue(false);
+        $this->assertTrue(true);
     }
 
 }

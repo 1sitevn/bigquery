@@ -167,7 +167,23 @@ class BigQueryService
         try {
             $queryJobConfig = $this->getConnection()->query($query)->parameters($params);
 
-            return $this->getConnection()->runQuery($queryJobConfig);
+            /**
+             * @var QueryResults $data
+             */
+            $queryResults = $this->getConnection()->runQuery($queryJobConfig);
+
+            if ($queryResults->isComplete()) {
+                $rows = $queryResults->rows();
+
+                $data = [];
+                foreach ($rows as $row) {
+                    $data[] = $row;
+                }
+
+                return [
+                    'data' => !empty($data) ? $data : null
+                ];
+            }
         } catch (\Exception $exception) {
             return json_decode($exception->getMessage());
         }
