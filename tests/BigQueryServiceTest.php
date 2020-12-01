@@ -392,7 +392,15 @@ class BigQueryServiceTest extends TestCase
             'id' => 1
         ]);
 
-        /*$queryResults = $this->service->query("update test.events set type = 'test' where id = @id", [
+        /**
+         * https://big-data-demystified.ninja/2020/03/26/bigquery-error-update-or-delete-statement-over-table-would-affect-rows-in-the-streaming-buffer-which-is-not-supported/
+         * After 90 minute: update, delete
+         */
+        /*$queryResults = $this->service->query("update test.events set type = 'test', label = 'Test' where id = @id", [
+            'id' => 1
+        ]);*/
+
+        /*$queryResults = $this->service->query("delete test.events where id = @id", [
             'id' => 1
         ]);*/
 
